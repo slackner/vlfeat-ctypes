@@ -18,3 +18,11 @@ img_smooth = single(img_smooth);
 [frames, descrs] = vl_dsift(img_smooth, 'size', binsize);
 dlmwrite('dsift_frames.txt', frames, 'delimiter', '\t', 'precision', 4);
 dlmwrite('dsift_descrs.txt', descrs, 'delimiter', '\t', 'precision', 4);
+
+% Test vl_kmeans
+[centers, assigns] = vl_kmeans([1 2 3 10 11 12], 2);
+centers, assigns
+
+[centers, assigns] = vl_kmeans([1 2 3 10 11 12;
+                                0 0 0  1  1  1], 2);
+centers, assigns

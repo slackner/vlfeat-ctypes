@@ -18,7 +18,6 @@ class Tests(unittest.TestCase):
     def test_all(self):
         img = numpy.array(Image.open('roofs1.jpg'))
 
-
         # Test rgb2gray
         img_gray = rgb2gray(img)
         expected = numpy.loadtxt("img_gray.txt", delimiter='\t')
@@ -40,6 +39,15 @@ class Tests(unittest.TestCase):
         expected = numpy.loadtxt("dsift_descrs.txt", delimiter='\t')
         self.assertEqual(descrs.shape, expected.shape)
         self.assertTrue(numpy.linalg.norm(expected - descrs) < 28) # rounding errors?
+
+        # Test vl_kmeans
+        centers, assigns = vlfeat.vl_kmeans(numpy.array([[1], [2], [3], [10], [11], [12]], dtype='f'), 2, quantize=True)
+        self.assertTrue(numpy.allclose(centers, numpy.array([[2], [11]])))
+        self.assertTrue(numpy.allclose(assigns, numpy.array([0, 0, 0, 1, 1, 1])))
+
+        centers, assigns = vlfeat.vl_kmeans(numpy.array([[1, 0], [2, 0], [3, 0], [10, 1], [11, 1], [12, 1]], dtype='f'), 2, quantize=True)
+        self.assertTrue(numpy.allclose(centers, numpy.array([[11, 1], [2, 0]]))) # order swapped?
+        self.assertTrue(numpy.allclose(assigns, numpy.array([1, 1, 1, 0, 0, 0])))
 
 if __name__ == '__main__':
     unittest.main()
