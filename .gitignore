@@ -9,3 +9,5 @@ __pycache__
 /vlfeat/libvl.so
 /vlfeat/libvl.dylib
 /vlfeat/vl.dll
+
+/tests/*.txt
