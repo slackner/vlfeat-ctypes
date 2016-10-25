@@ -7,8 +7,10 @@ from ctypes import cast, POINTER, Structure, c_int, c_float, c_double
 c_float_p = POINTER(c_float)
 c_double_p = POINTER(c_double)
 
-from .vl_ctypes import LIB, c_to_np_types
+from .vl_ctypes import load_library, c_to_np_types
 from .utils import as_float_image
+
+LIB = load_library()
 
 np_float = c_to_np_types[c_float]
 np_double = c_to_np_types[c_double]

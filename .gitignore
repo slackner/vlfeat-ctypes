@@ -1,13 +1,10 @@
 *.pyc
 __pycache__
 
-/build/
-/dist/
-/vlfeat_ctypes.egg-info/
-/MANIFEST
+/vlfeat-*-bin.tar.gz
 
-/vlfeat/libvl.so
-/vlfeat/libvl.dylib
-/vlfeat/vl.dll
+/vlfeat/*.so
+/vlfeat/*.dylib
+/vlfeat/*.dll
 
 /tests/*.txt

@@ -7,10 +7,11 @@ from ctypes import (c_int, c_float, c_double, c_void_p,
 import numpy as np
 import numpy.ctypeslib as npc
 
-from .vl_ctypes import (LIB, CustomStructure, Enum,
+from .vl_ctypes import (load_library, CustomStructure, Enum,
                         vl_type, vl_size, np_to_c_types, c_to_vl_types)
 from .utils import is_integer
 
+LIB = load_library()
 
 class VectorComparisonType(Enum):
     DISTANCE_L1 = 0
