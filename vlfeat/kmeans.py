@@ -38,7 +38,7 @@ class KMeansAlgorithm(Enum):
 
 class KMeansInitialization(Enum):
     RANDOM = 0
-    PLUS_PLUS = 1
+    PLUSPLUS = 1
 
 class VlKMeans(CustomStructure):
     _fields_ = [
@@ -168,10 +168,11 @@ def _check_integer(x, name, lower=None, upper=None):
     if upper is not None and x > upper:
         raise ValueError("{} must be no more than {}".format(name, upper))
 
-def vl_kmeans(data, num_centers,
-              algorithm='lloyd', initialization='plus_plus', distance='l2',
-              max_iter=100, num_rep=1, verbose=False,
-              quantize=False, ret_energy=False):
+def vl_kmeans(data, num_centers, ret_quantize=False, ret_energy=False,
+              verbose=False,  max_iter=100, min_energy_var=None,
+              algorithm='lloyd', initialization='plusplus', distance='l2',
+              num_rep=1, num_trees=3, max_compare=100):
+
     data = np.asarray(data)
     c_dtype = np_to_c_types.get(data.dtype, None)
     if c_dtype not in [c_float, c_double]:
@@ -184,9 +185,13 @@ def vl_kmeans(data, num_centers,
     if dim == 0:
         raise ValueError("data dimension is zero")
 
-    _check_integer(num_centers, "num_centers", 0, num_data)
-    _check_integer(num_rep, "num_rep", 1)
+    _check_integer(num_centers, "num_centers", 1, num_data)
     _check_integer(max_iter, "max_iter", 0)
+    if min_energy_var is not None:
+        _check_integer(min_energy_var, "min_energy_var", 0)
+    _check_integer(num_rep, "num_rep", 1)
+    _check_integer(num_trees, "num_trees", 1)
+    _check_integer(max_compare, "max_compare", 0)
 
     algorithm = KMeansAlgorithm._members[algorithm.upper()]
     initialization = KMeansInitialization._members[initialization.upper()]
@@ -200,9 +205,10 @@ def vl_kmeans(data, num_centers,
         vl_kmeans_set_algorithm(kmeans, algorithm)
         vl_kmeans_set_initialization(kmeans, initialization)
         vl_kmeans_set_max_num_iterations(kmeans, max_iter)
-        # vl_kmeans_set_max_num_comparisons(kmeans, max_compare)
-        # vl_kmeans_set_num_trees(kmeans, num_trees)
-        # if ...: vl_kmeans_set_min_energy_variation(kmeans, min_energy_var)
+        vl_kmeans_set_max_num_comparisons(kmeans, max_compare)
+        vl_kmeans_set_num_trees(kmeans, num_trees)
+        if min_energy_var is not None:
+            vl_kmeans_set_min_energy_variation(kmeans, min_energy_var)
 
         if verbose:
             algorithmName = vl_kmeans_get_algorithm(kmeans).name
@@ -218,8 +224,8 @@ def vl_kmeans(data, num_centers,
             print("kmeans: data dimension = {}".format(dim))
             print("kmeans: num. data points = {}".format(num_data))
             print("kmeans: num. centers = {}".format(num_centers))
-            # print("kmeans: max num. comparisons = {}".format(max_compare))
-            # print("kmeans: num. trees = {}".format(num_trees))
+            print("kmeans: max num. comparisons = {}".format(max_compare))
+            print("kmeans: num. trees = {}".format(num_trees))
             print()
 
         data_p = data.ctypes.data_as(c_void_p)
@@ -229,16 +235,17 @@ def vl_kmeans(data, num_centers,
         centers_p = cast(vl_kmeans_get_centers(kmeans), POINTER(c_dtype))
         centers = np.ctypeslib.as_array(centers_p, (vl_kmeans_get_num_centers(kmeans), dim)).copy()
 
-        if not quantize and not ret_energy:
+        if not ret_quantize and not ret_energy:
             return centers
 
         ret = [centers]
         ret_fields = ['centers']
 
         # optionally quantize
-        if quantize:
+        if ret_quantize:
             assignments = np.empty(num_data, dtype=np.uint32)
             vl_kmeans_quantize(kmeans_p, assignments, None, data_p, num_data)
+            # NOTE: In contrast to Matlab, the assignment indices start with 0
 
             ret.append(assignments)
             ret_fields.append('assignments')
