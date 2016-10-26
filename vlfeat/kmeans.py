@@ -180,8 +180,8 @@ def vl_kmeans(data, num_centers,
     distance = VectorComparisonType._members['DISTANCE_' + distance.upper()]
 
     kmeans_p = vl_kmeans_new(vl_dtype, distance)
-    kmeans = kmeans_p[0]
     try:
+        kmeans = kmeans_p.contents
         vl_kmeans_set_verbosity(kmeans, verbosity)
         vl_kmeans_set_num_repetitions(kmeans, num_rep)
         vl_kmeans_set_algorithm(kmeans, algorithm)
