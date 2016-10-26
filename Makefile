@@ -24,3 +24,4 @@ vlfeat/libvl-x64.so: vlfeat-$(VERSION)-bin.tar.gz
 clean:
 	rm -f vlfeat-$(VERSION)-bin.tar.gz
 	rm -f vlfeat/libvl-*.so
+	rm -f vlfeat/*.pyc
