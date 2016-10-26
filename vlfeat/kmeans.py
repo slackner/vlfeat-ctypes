@@ -165,7 +165,8 @@ def vl_kmeans(data, num_centers, ret_quantize=False, ret_energy=False,
               algorithm='lloyd', initialization='plusplus', distance='l2',
               num_rep=1, num_trees=3, max_compare=100):
 
-    data = np.asarray(data)
+    # NOTE: We expect one entry per row instead of column
+    data = np.asarray(data, order='C')
     c_dtype = np_to_c_types.get(data.dtype, None)
     if c_dtype not in [c_float, c_double]:
         raise TypeError("data should be float32 or float64")
@@ -224,8 +225,9 @@ def vl_kmeans(data, num_centers, ret_quantize=False, ret_energy=False,
         energy = vl_kmeans_cluster(kmeans_p, data_p, dim, num_data, num_centers)
 
         # copy centers
-        centers_p = cast(vl_kmeans_get_centers(kmeans), POINTER(c_dtype))
-        centers = np.ctypeslib.as_array(centers_p, (vl_kmeans_get_num_centers(kmeans), dim)).copy()
+        centers = cast(vl_kmeans_get_centers(kmeans), POINTER(c_dtype))
+        centers = np.ctypeslib.as_array(centers, (vl_kmeans_get_num_centers(kmeans), dim))
+        centers = np.require(centers, requirements='O')
 
         if not ret_quantize and not ret_energy:
             return centers

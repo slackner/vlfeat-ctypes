@@ -225,18 +225,17 @@ def vl_dsift(data,  verbose=False, fast=False, norm=False, bounds=None,
 
         # copy frames' locations, norms out
         # the frames are a structure of just 4 doubles (VLDsiftKeypoint)
-        frames_p = cast(vl_dsift_get_keypoints(dsift), c_double_p)
-        frames_p_a = npc.as_array(frames_p, shape=(num_frames, 4))
+        frames = cast(vl_dsift_get_keypoints(dsift), c_double_p)
+        frames = npc.as_array(frames, shape=(num_frames, 4))
         cols = [1, 0] # y, x
         if norm:
             cols.append(3) # norm
-        frames = np.require(frames_p_a[:, cols], requirements=['C', 'O'])
+        frames = np.require(frames[:, cols], requirements=['C', 'O'])
         # NOTE: In contrast to Matlab, the assignment indices start with 0
 
         # copy descriptors into a new array
-        descrs_p = npc.as_array(vl_dsift_get_descriptors(dsift), shape=(num_frames, descr_size))
-        descrs = descrs_p * 512
-        assert descrs.flags.owndata
+        descrs = npc.as_array(vl_dsift_get_descriptors(dsift), shape=(num_frames, descr_size))
+        descrs = np.require(descrs * 512, requirements='O')
         np.minimum(descrs, 255, out=descrs)
         if not float_descriptors:
             descrs = descrs.astype(np.uint8)  # TODO: smarter about copying?
