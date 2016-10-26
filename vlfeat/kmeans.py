@@ -193,7 +193,7 @@ def vl_kmeans(data, num_centers, ret_quantize=False, ret_energy=False,
     kmeans_p = vl_kmeans_new(vl_dtype, distance)
     try:
         kmeans = kmeans_p.contents
-        vl_kmeans_set_verbosity(kmeans, 1 if verbose else 0)
+        vl_kmeans_set_verbosity(kmeans, verbose)
         vl_kmeans_set_num_repetitions(kmeans, num_rep)
         vl_kmeans_set_algorithm(kmeans, algorithm)
         vl_kmeans_set_initialization(kmeans, initialization)
