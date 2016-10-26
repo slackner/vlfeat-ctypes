@@ -147,7 +147,7 @@ def vl_dsift_transpose_descriptor(dest, src, num_bin_t, num_bin_x, num_bin_y):
 
 ################################################################################
 
-def vl_dsift(data,  verbose=False, fast=False, norm=False, bounds=None,
+def vl_dsift(data, verbose=False, fast=False, norm=False, bounds=None,
              size=3, step=1, window_size=None, float_descriptors=False,
              geometry=(4, 4, 8)):
     '''
