@@ -1,7 +1,8 @@
 from ctypes import (cdll, sizeof, Structure,
     c_float, c_double,
     c_int, c_int8, c_int16, c_int32, c_int64,
-    c_uint, c_uint8, c_uint16, c_uint32, c_uint64)
+    c_uint, c_uint8, c_uint16, c_uint32, c_uint64,
+    c_voidp)
 
 import numpy as np
 import platform
@@ -9,10 +10,10 @@ import os
 
 
 def load_library(version="0.9.16"):
-    filenames = { ("Linux", "32bit"): "libvl-x86.so",
-                  ("Linux", "64bit"): "libvl-x64.so" }
+    filenames = { ("Linux", 32): "libvl-x86.so",
+                  ("Linux", 64): "libvl-x64.so" }
 
-    filename = filenames[(platform.system(), platform.architecture()[0])]
+    filename = filenames[(platform.system(), 8 * sizeof(c_voidp))]
     filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
     return cdll[filename]
 
@@ -124,10 +125,8 @@ class CustomStructure(Structure):
 
 ################################################################################
 
-# TODO actually figure out if it's built LP64 or ILP64 or whatever
-vl_size = c_uint64
-vl_index = c_int64
-
+vl_size, vl_index = { 32: (c_uint32, c_int32),
+                      64: (c_uint64, c_int64) }[8 * sizeof(c_voidp)]
 
 class vl_type(Enum):
     FLOAT = 1
