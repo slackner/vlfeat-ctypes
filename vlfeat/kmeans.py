@@ -118,6 +118,32 @@ vl_kmeans_refine_centers = LIB['vl_kmeans_refine_centers']
 vl_kmeans_refine_centers.restype = c_double
 vl_kmeans_refine_centers.argtypes = [VlKMeans_p, c_void_p, vl_size]
 
+def vl_kmeans_set_verbosity(self, verbosity):
+    self.verbosity = verbosity
+
+def vl_kmeans_set_num_repetitions(self, num_rep):
+    assert num_rep >= 1
+    self.numRepetitions = num_rep
+
+def vl_kmeans_set_algorithm(self, algorithm):
+    self.algorithm = algorithm
+
+def vl_kmeans_set_initialization(self, initialization):
+    self.initialization = initialization
+
+def vl_kmeans_set_max_num_iterations(self, max_iter):
+    self.maxNumIterations = max_iter
+
+def vl_kmeans_set_max_num_comparisons(self, max_compare):
+    self.maxNumComparisons = max_compare
+
+def vl_kmeans_set_num_trees(self, num_trees):
+    self.numTrees = num_trees
+
+def vl_kmeans_set_min_energy_variation(self, min_energy_var):
+    assert min_energy_var >= 0
+    self.minEnergyVariation = min_energy_var
+
 
 def _check_integer(x, name, lower=None, upper=None):
     if not is_integer(x):
@@ -156,11 +182,14 @@ def vl_kmeans(data, num_centers,
     kmeans_p = vl_kmeans_new(vl_dtype, distance)
     kmeans = kmeans_p[0]
     try:
-        kmeans.verbosity = verbosity
-        kmeans.numRepetitions = num_rep
-        kmeans.algorithm = algorithm
-        kmeans.initialization = initialization
-        kmeans.maxNumIterations = max_iter
+        vl_kmeans_set_verbosity(kmeans, verbosity)
+        vl_kmeans_set_num_repetitions(kmeans, num_rep)
+        vl_kmeans_set_algorithm(kmeans, algorithm)
+        vl_kmeans_set_initialization(kmeans, initialization)
+        vl_kmeans_set_max_num_iterations(kmeans, max_iter)
+        # vl_kmeans_set_max_num_comparisons(kmeans, max_compare)
+        # vl_kmeans_set_num_trees(kmeans, num_trees)
+        # if ...: vl_kmeans_set_min_energy_variation(kmeans, min_energy_var)
 
         if verbosity:
             pr = lambda *a, **k: print('kmeans:', *a, **k)
