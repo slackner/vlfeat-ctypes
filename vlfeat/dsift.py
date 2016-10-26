@@ -106,7 +106,7 @@ def vl_dsift_transpose_descriptor(dest, src, num_bin_t, num_bin_x, num_bin_y):
 
 def vl_dsift(data, fast=False, norm=False, bounds=None, size=3, step=1,
               window_size=None, float_descriptors=False,
-              verbose=False, matlab_style=True):
+              verbose=False):
     '''
     Dense sift descriptors from an image.
 
@@ -114,13 +114,8 @@ def vl_dsift(data, fast=False, norm=False, bounds=None, size=3, step=1,
         frames: num_frames x (2 or 3) matrix of x, y, (norm)
         descrs: num_frames x 128 matrix of descriptors
     '''
-    if not matlab_style:
-        import warnings
-        warnings.warn("matlab_style=False gets different results than matlab, "
-                      "not sure why or how incorrect they are.")
 
-    order = 'F' if matlab_style else 'C'
-    data = as_float_image(data, dtype=np.float32, order=order)
+    data = as_float_image(data, dtype=np.float32, order='F')
     if data.ndim != 2:
         raise TypeError("data should be a 2d array")
 
@@ -136,10 +131,7 @@ def vl_dsift(data, fast=False, norm=False, bounds=None, size=3, step=1,
 
         # set parameters
         if bounds is not None:
-            if matlab_style:
-                y0, x0, y1, x1 = bounds  # transposed
-            else:
-                x0, y0, x1, y1 = bounds
+            y0, x0, y1, x1 = bounds  # transposed
             dsift.boundMinX = int(max(x0, 0))
             dsift.boundMinY = int(max(y0, 0))
             dsift.boundMaxX = int(min(x1, M - 1))
@@ -163,7 +155,7 @@ def vl_dsift(data, fast=False, norm=False, bounds=None, size=3, step=1,
             y0 = dsift.boundMinY + 1
             x1 = dsift.boundMaxX + 1
             y1 = dsift.boundMaxY + 1
-            bound_args = [y0, x0, y1, x1] if matlab_style else [x0, y0, x1, y1]
+            bound_args = [y0, x0, y1, x1]
             pr("bounds:            [minX,minY,maxX,maxY] = [{}, {}, {}, {}]"
                 .format(*bound_args))
             pr("subsampling steps: stepX={}, stepY={}".format(
@@ -187,7 +179,7 @@ def vl_dsift(data, fast=False, norm=False, bounds=None, size=3, step=1,
         #       the provided binaries on os x, at least
         frames_p = cast(dsift.frames, c_double_p)
         frames_p_a = npc.as_array(frames_p, shape=(num_frames, 4))
-        cols = [1, 0] if matlab_style else [0, 1]
+        cols = [1, 0]
         if norm:
             cols.append(3)
         frames = np.require(frames_p_a[:, cols], requirements=['C', 'O'])
@@ -199,11 +191,10 @@ def vl_dsift(data, fast=False, norm=False, bounds=None, size=3, step=1,
         np.minimum(descrs, 255, out=descrs)
         if not float_descriptors:
             descrs = descrs.astype(np.uint8)  # TODO: smarter about copying?
-        if matlab_style:
-            new_order = np.empty(descr_size, dtype=int)
-            vl_dsift_transpose_descriptor(new_order, np.arange(descr_size),
-                geom.numBinT, geom.numBinX, geom.numBinY)
-            descrs = descrs[:, new_order]
+        new_order = np.empty(descr_size, dtype=int)
+        vl_dsift_transpose_descriptor(new_order, np.arange(descr_size),
+            geom.numBinT, geom.numBinX, geom.numBinY)
+        descrs = descrs[:, new_order]
         # the old, super-slow way:
         ## # gross pointer arithmetic to get the relevant descriptor
         ## descrs_addr = addressof(descrs.contents)

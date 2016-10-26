@@ -30,7 +30,6 @@ def vl_phow(image, fast=True, sizes=DEFAULT_SIZES, step=DEFAULT_STEP,
         'float_descriptors': float_descriptors,
         'step': step,
         'verbose': verbose,
-        'matlab_style': True,
     }
 
     # standardize the image
