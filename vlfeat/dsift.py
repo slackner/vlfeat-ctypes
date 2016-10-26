@@ -8,7 +8,7 @@ c_float_p = POINTER(c_float)
 c_double_p = POINTER(c_double)
 
 from .vl_ctypes import load_library, c_to_np_types
-from .utils import as_float_image
+from .utils import as_float_image, check_integer, check_float
 
 LIB = load_library()
 
@@ -147,9 +147,9 @@ def vl_dsift_transpose_descriptor(dest, src, num_bin_t, num_bin_x, num_bin_y):
 
 ################################################################################
 
-def vl_dsift(data, fast=False, norm=False, bounds=None, size=3, step=1,
-              window_size=None, float_descriptors=False,
-              verbose=False):
+def vl_dsift(data,  verbose=False, fast=False, norm=False, bounds=None,
+             size=3, step=1, window_size=None, float_descriptors=False,
+             geometry=(4, 4, 8)):
     '''
     Dense sift descriptors from an image.
 
@@ -162,19 +162,33 @@ def vl_dsift(data, fast=False, norm=False, bounds=None, size=3, step=1,
     if data.ndim != 2:
         raise TypeError("data should be a 2d array")
 
+    geom = VLDsiftDescriptorGeometry()
+    geom.numBinX, geom.numBinY, geom.numBinT = geometry
+    geom.binSizeX, geom.binSizeY = (size, size) if np.isscalar(size) else size
+
+    check_integer(geom.binSizeX, "size[0]", 1)
+    check_integer(geom.binSizeY, "size[1]", 1)
+    check_integer(geom.numBinX, "geometry[0]", 1)
+    check_integer(geom.numBinY, "geometry[1]", 1)
+    check_integer(geom.numBinT, "geometry[2]", 1)
+
+    step = (step, step) if np.isscalar(step) else step
+    check_integer(step[0], "step[0]", 1)
+    check_integer(step[1], "step[1]", 1)
+
     if window_size is not None:
-        assert np.isscalar(window_size) and window_size >= 0
+        check_float(window_size, "window_size", 0)
 
     # construct the dsift object
     M, N = data.shape
-    dsift_p = vl_dsift_new_basic(M, N, step, size)
+    dsift_p = vl_dsift_new(M, N)
     try:
         dsift = dsift_p.contents
-        # vl_dsift_set_geometry(dsift, geom)
-        # vl_dsift_set_steps(dsift, step[0], step[1])
+        vl_dsift_set_geometry(dsift, geom)
+        vl_dsift_set_steps(dsift, step[0], step[1])
 
         if bounds is not None:
-            y0, x0, y1, x1 = bounds  # transposed
+            y0, x0, y1, x1 = bounds
             vl_dsift_set_bounds(dsift, int(max(x0, 0)),
                                        int(max(y0, 0)),
                                        int(min(x1, M - 1)),
