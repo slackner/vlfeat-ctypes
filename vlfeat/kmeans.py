@@ -125,14 +125,26 @@ def vl_kmeans_set_num_repetitions(self, num_rep):
     assert num_rep >= 1
     self.numRepetitions = num_rep
 
+def vl_kmeans_get_num_repetitions(self):
+    return self.numRepetitions
+
 def vl_kmeans_set_algorithm(self, algorithm):
     self.algorithm = algorithm
+
+def vl_kmeans_get_algorithm(self):
+    return self.algorithm
 
 def vl_kmeans_set_initialization(self, initialization):
     self.initialization = initialization
 
+def vl_kmeans_get_initialization(self):
+    return self.initialization
+
 def vl_kmeans_set_max_num_iterations(self, max_iter):
     self.maxNumIterations = max_iter
+
+def vl_kmeans_get_max_num_iterations(self):
+    return self.maxNumIterations
 
 def vl_kmeans_set_max_num_comparisons(self, max_compare):
     self.maxNumComparisons = max_compare
@@ -143,6 +155,15 @@ def vl_kmeans_set_num_trees(self, num_trees):
 def vl_kmeans_set_min_energy_variation(self, min_energy_var):
     assert min_energy_var >= 0
     self.minEnergyVariation = min_energy_var
+
+def vl_kmeans_get_min_energy_variation(self):
+    return self.minEnergyVariation
+
+def vl_kmeans_get_data_type(self):
+    return self.dataType
+
+def vk_kmeans_get_distance(self):
+    return self.distance
 
 
 def _check_integer(x, name, lower=None, upper=None):
@@ -191,16 +212,21 @@ def vl_kmeans(data, num_centers,
         # if ...: vl_kmeans_set_min_energy_variation(kmeans, min_energy_var)
 
         if verbose:
-            pr = lambda *a, **k: print('kmeans:', *a, **k)
-            pr("Initialization = {}".format(kmeans.initialization.name))
-            pr("Algorithm = {}".format(kmeans.algorithm.name))
-            pr("MaxNumIterations = {}".format(kmeans.maxNumIterations))
-            pr("NumReptitions = {}".format(kmeans.numRepetitions))
-            pr("data type = {}".format(kmeans.dataType.name))
-            pr("distance = {}".format(kmeans.distance.name))
-            pr("data dimension = {}".format(dim))
-            pr("num. data points = {}".format(num_data))
-            pr("num. centers = {}".format(num_centers))
+            algorithmName = vl_kmeans_get_algorithm(kmeans).name
+            initializationName = vl_kmeans_get_initialization(kmeans).name
+
+            print("kmeans: Initialization = {}".format(initializationName))
+            print("kmeans: Algorithm = {}".format(algorithmName))
+            print("kmeans: MaxNumIterations = {}".format(vl_kmeans_get_max_num_iterations(kmeans)))
+            print("kmeans: minEnergyVariation = {}".format(vl_kmeans_get_min_energy_variation(kmeans)))
+            print("kmeans: NumRepetitions = {}".format(vl_kmeans_get_num_repetitions(kmeans)))
+            print("kmeans: data type = {}".format(vl_kmeans_get_data_type(kmeans).name))
+            print("kmeans: distance = {}".format(vk_kmeans_get_distance(kmeans).name))
+            print("kmeans: data dimension = {}".format(dim))
+            print("kmeans: num. data points = {}".format(num_data))
+            print("kmeans: num. centers = {}".format(num_centers))
+            # print("kmeans: max num. comparisons = {}".format(max_compare))
+            # print("kmeans: num. trees = {}".format(num_trees))
             print()
 
         data_p = data.ctypes.data_as(c_void_p)
