@@ -3,8 +3,25 @@ import numpy as np
 
 def is_integer_type(x):
     return issubclass(np.asanyarray(x).dtype.type, np.integer)
+
 def is_integer(x):
     return np.isscalar(x) and is_integer_type(x)
+
+def check_float(x, name, lower=None, upper=None):
+    if not np.isscalar(x):
+        raise TypeError("{} must be an integer".format(name))
+    if lower is not None and x < lower:
+        raise ValueError("{} must be at least {}".format(name, lower))
+    if upper is not None and x > upper:
+        raise ValueError("{} must be no more than {}".format(name, upper))
+
+def check_integer(x, name, lower=None, upper=None):
+    if not is_integer(x):
+        raise TypeError("{} must be an integer".format(name))
+    if lower is not None and x < lower:
+        raise ValueError("{} must be at least {}".format(name, lower))
+    if upper is not None and x > upper:
+        raise ValueError("{} must be no more than {}".format(name, upper))
 
 def as_float_image(image, dtype=None, order=None):
     if image.dtype.kind in ('u', 'i'):
@@ -26,7 +43,6 @@ def as_float_image(image, dtype=None, order=None):
             image = np.maximum(np.asarray(image, dtype=dtype, order=order), 0)
         return np.asarray(image, dtype=dtype, order=order)
 
-
 def rgb2gray(img):
     """Converts an RGB image to grayscale using matlab's algorithm."""
     T = np.linalg.inv(np.array([
@@ -37,7 +53,6 @@ def rgb2gray(img):
     r_c, g_c, b_c = T[0]
     r, g, b = np.rollaxis(as_float_image(img), axis=-1)
     return r_c * r + g_c * g + b_c * b
-
 
 # copied from skimage.color.rgb2hsv
 def rgb2hsv(arr):

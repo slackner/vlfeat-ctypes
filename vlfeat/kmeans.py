@@ -9,7 +9,7 @@ import numpy.ctypeslib as npc
 
 from .vl_ctypes import (load_library, CustomStructure, Enum,
                         vl_type, vl_size, np_to_c_types, c_to_vl_types)
-from .utils import is_integer
+from .utils import check_integer, check_float
 
 LIB = load_library()
 
@@ -160,16 +160,8 @@ def vl_kmeans_get_num_centers(self):
 
 ################################################################################
 
-def _check_integer(x, name, lower=None, upper=None):
-    if not is_integer(x):
-        raise TypeError("{} must be an integer".format(name))
-    if lower is not None and x < lower:
-        raise ValueError("{} must be at least {}".format(name, lower))
-    if upper is not None and x > upper:
-        raise ValueError("{} must be no more than {}".format(name, upper))
-
 def vl_kmeans(data, num_centers, ret_quantize=False, ret_energy=False,
-              verbose=False,  max_iter=100, min_energy_var=None,
+              verbose=False, max_iter=100, min_energy_var=None,
               algorithm='lloyd', initialization='plusplus', distance='l2',
               num_rep=1, num_trees=3, max_compare=100):
 
@@ -180,18 +172,18 @@ def vl_kmeans(data, num_centers, ret_quantize=False, ret_energy=False,
     vl_dtype = c_to_vl_types[c_dtype]
 
     if data.ndim != 2:
-        raise TypeError("data must be num_data x dim")
+        raise TypeError("data should be a 2d array")
     num_data, dim = data.shape
     if dim == 0:
         raise ValueError("data dimension is zero")
 
-    _check_integer(num_centers, "num_centers", 1, num_data)
-    _check_integer(max_iter, "max_iter", 0)
+    check_integer(num_centers, "num_centers", 1, num_data)
+    check_integer(max_iter, "max_iter", 0)
     if min_energy_var is not None:
-        _check_integer(min_energy_var, "min_energy_var", 0)
-    _check_integer(num_rep, "num_rep", 1)
-    _check_integer(num_trees, "num_trees", 1)
-    _check_integer(max_compare, "max_compare", 0)
+        check_float(min_energy_var, "min_energy_var", 0)
+    check_integer(num_rep, "num_rep", 1)
+    check_integer(num_trees, "num_trees", 1)
+    check_integer(max_compare, "max_compare", 0)
 
     algorithm = KMeansAlgorithm._members[algorithm.upper()]
     initialization = KMeansInitialization._members[initialization.upper()]
