@@ -19,11 +19,12 @@ class VectorComparisonType(Enum):
     DISTANCE_CHI2 = 2
     DISTANCE_HELLINGER = 3
     DISTANCE_JS = 4
-    KERNEL_L1 = 5
-    KERNEL_L2 = 6
-    KERNEL_CHI2 = 7
-    KERNEL_HELLINGER = 8
-    KERNEL_JS = 9
+    DISTANCE_MAHALANOBIS = 5
+    KERNEL_L1 = 6
+    KERNEL_L2 = 7
+    KERNEL_CHI2 = 8
+    KERNEL_HELLINGER = 9
+    KERNEL_JS = 10
 
 FloatVectorComparisonFunction = POINTER(CFUNCTYPE(
     c_float, vl_size, POINTER(c_float), POINTER(c_float)))
@@ -47,11 +48,14 @@ class VlKMeans(CustomStructure):
         ('dataType', vl_type),
         ('dimension', vl_size),
         ('numCenters', vl_size),
+        ('numTrees', vl_size),
+        ('maxNumComparisons', vl_size),
 
         ('initialization', KMeansInitialization),
         ('algorithm', KMeansAlgorithm),
         ('distance', VectorComparisonType),
         ('maxNumIterations', vl_size),
+        ('minEnergyVariation', c_double),
         ('numRepetitions', vl_size),
         ('verbosity', c_int),
 
@@ -99,15 +103,15 @@ vl_kmeans_set_centers = LIB['vl_kmeans_set_centers']
 vl_kmeans_set_centers.restype = None
 vl_kmeans_set_centers.argtypes = [VlKMeans_p, c_void_p, vl_size, vl_size]
 
-vl_kmeans_seed_centers_with_rand_data = \
-    LIB['vl_kmeans_seed_centers_with_rand_data']
-vl_kmeans_seed_centers_with_rand_data.restype = None
-vl_kmeans_seed_centers_with_rand_data.argtypes = [
+vl_kmeans_init_centers_with_rand_data = \
+    LIB['vl_kmeans_init_centers_with_rand_data']
+vl_kmeans_init_centers_with_rand_data.restype = None
+vl_kmeans_init_centers_with_rand_data.argtypes = [
     VlKMeans_p, c_void_p, vl_size, vl_size, vl_size]
 
-vl_kmeans_seed_centers_plus_plus = LIB['vl_kmeans_seed_centers_plus_plus']
-vl_kmeans_seed_centers_plus_plus.restype = None
-vl_kmeans_seed_centers_plus_plus.argtypes = [
+vl_kmeans_init_centers_plus_plus = LIB['vl_kmeans_init_centers_plus_plus']
+vl_kmeans_init_centers_plus_plus.restype = None
+vl_kmeans_init_centers_plus_plus.argtypes = [
     VlKMeans_p, c_void_p, vl_size, vl_size, vl_size]
 
 vl_kmeans_refine_centers = LIB['vl_kmeans_refine_centers']
