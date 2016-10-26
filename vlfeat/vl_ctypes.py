@@ -96,13 +96,6 @@ class Enum(c_uint):
     def __repr__(self):
         return "<member %s=%d of %r>" % (self.name, self.value, self.__class__)
 
-
-# XXX: here because otherwise __init__ doesn't seem to get called
-def returns_enum(enum_subclass):
-    def inner(value):
-        return enum_subclass(value)
-    return inner
-
 ################################################################################
 ### Custom structure class, with defaults and nicer enumeration support
 
