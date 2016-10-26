@@ -98,25 +98,16 @@ class Enum(c_uint):
         return "<member %s=%d of %r>" % (self.name, self.value, self.__class__)
 
 ################################################################################
-### Custom structure class, with defaults and nicer enumeration support
 
-# extremely loosely based on code from pyflann.flann_ctypes
-
-_identity = lambda x: x
 class CustomStructure(Structure):
-    _defaults_ = {}
     __enums = {}
 
     def __init__(self, *args, **kwargs):
-        self.__enums = dict((f, t) for f, t in self._fields_
-                            if issubclass(t, Enum))
-        for field, val in self._defaults_.iteritems():
-            setattr(self, field, val)
-
+        self.__enums = dict((f, t) for f, t in self._fields_ if issubclass(t, Enum))
         Structure.__init__(self, *args, **kwargs)
 
     def __setattr__(self, k, v):
-        class_wrapper = self.__enums.get(k, _identity)
+        class_wrapper = self.__enums.get(k, lambda x: x)
         super(CustomStructure, self).__setattr__(k, class_wrapper(v))
 
     def update(self, **vals):
