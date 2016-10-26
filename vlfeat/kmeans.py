@@ -226,7 +226,7 @@ def vl_kmeans(data, num_centers, ret_quantize=False, ret_energy=False,
 
         # copy centers
         centers = cast(vl_kmeans_get_centers(kmeans), POINTER(c_dtype))
-        centers = np.ctypeslib.as_array(centers, (vl_kmeans_get_num_centers(kmeans), dim))
+        centers = npc.as_array(centers, (vl_kmeans_get_num_centers(kmeans), dim))
         centers = np.require(centers, requirements='O')
 
         if not ret_quantize and not ret_energy:
