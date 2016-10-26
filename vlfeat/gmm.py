@@ -199,7 +199,7 @@ def vl_gmm(data, num_clusters, ret_loglikelihood=False, ret_posterior=False,
         # optionally return posterior probabilities
         if ret_posterior:
             posteriors = cast(vl_gmm_get_posteriors(gmm_p), POINTER(c_dtype))
-            posteriors = npc.as_array(posteriors, (vl_gmm_get_num_clusters(gmm_p), num_data))
+            posteriors = npc.as_array(posteriors, (num_data, vl_gmm_get_num_clusters(gmm_p)))
             posteriors = np.require(posteriors, requirements='O')
 
             ret.append(posteriors)

@@ -4,6 +4,7 @@ from __future__ import division
 from PIL import Image
 import math
 import numpy
+import numpy.random
 import os
 import sys
 import unittest
@@ -72,6 +73,47 @@ class Tests(unittest.TestCase):
         centers, assigns = vlfeat.vl_kmeans(numpy.array([[1, 0], [2, 0], [3, 0], [10, 1], [11, 1], [12, 1]], dtype='f'), 2, ret_quantize=True)
         self.assertTrue(numpy.allclose(centers, numpy.array([[11, 1], [2, 0]]))) # order swapped?
         self.assertTrue(numpy.allclose(assigns, numpy.array([1, 1, 1, 0, 0, 0])))
+
+        # Test vl_gmm
+        if os.path.exists("gmm_data.txt"):
+            data = numpy.loadtxt("gmm_data.txt", delimiter='\t').transpose()
+        else:
+            data = numpy.random.rand(5000, 2)
+
+        means, covariances, priors, ll, posteriors = vlfeat.vl_gmm(data, 30, verbose=True, ret_loglikelihood=True, ret_posterior=True)
+        self.assertEqual(tuple(means.shape), (30, 2))
+        self.assertEqual(tuple(covariances.shape), (30, 2))
+        self.assertEqual(tuple(priors.shape), (30,))
+        self.assertEqual(tuple(posteriors.shape), (5000, 30))
+
+        if os.path.exists("gmm_means.txt"):
+            expected = numpy.loadtxt("gmm_means.txt", delimiter='\t').transpose()
+            self.assertTrue(numpy.allclose(means, expected, atol=1e-4))
+
+        if os.path.exists("gmm_covariances.txt"):
+            expected = numpy.loadtxt("gmm_covariances.txt", delimiter='\t').transpose()
+            self.assertTrue(numpy.allclose(covariances, expected, atol=1e-4))
+
+        if os.path.exists("gmm_priors.txt"):
+            expected = numpy.loadtxt("gmm_priors.txt", delimiter='\t').transpose()
+            self.assertTrue(numpy.allclose(priors, expected, atol=1e-4))
+
+        if os.path.exists("gmm_posteriors.txt"):
+            expected = numpy.loadtxt("gmm_posteriors.txt", delimiter='\t').transpose()
+            self.assertTrue(numpy.allclose(posteriors, expected, atol=1e-3))
+
+        # Test vl_fisher
+        if os.path.exists("fisher_data.txt"):
+            data = numpy.loadtxt("fisher_data.txt", delimiter='\t').transpose()
+        else:
+            data = numpy.random.rand(1000, 2)
+
+        encoding = vlfeat.vl_fisher(data, means, covariances, priors, verbose=True)
+        self.assertEqual(tuple(encoding.shape), (120,))
+
+        if os.path.exists("fisher_encoding.txt"):
+            expected = numpy.loadtxt("fisher_encoding.txt", delimiter='\t').transpose()
+            self.assertTrue(numpy.allclose(encoding, expected, atol=1e-4))
 
 if __name__ == '__main__':
     unittest.main()
