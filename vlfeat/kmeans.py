@@ -156,7 +156,7 @@ def _check_integer(x, name, lower=None, upper=None):
 
 def vl_kmeans(data, num_centers,
               algorithm='lloyd', initialization='plus_plus', distance='l2',
-              max_iter=100, num_rep=1, verbosity=0,
+              max_iter=100, num_rep=1, verbose=False,
               quantize=False, ret_energy=False):
     data = np.asarray(data)
     c_dtype = np_to_c_types.get(data.dtype, None)
@@ -172,7 +172,6 @@ def vl_kmeans(data, num_centers,
 
     _check_integer(num_centers, "num_centers", 0, num_data)
     _check_integer(num_rep, "num_rep", 1)
-    _check_integer(verbosity, "verbosity", 0)
     _check_integer(max_iter, "max_iter", 0)
 
     algorithm = KMeansAlgorithm._members[algorithm.upper()]
@@ -182,7 +181,7 @@ def vl_kmeans(data, num_centers,
     kmeans_p = vl_kmeans_new(vl_dtype, distance)
     try:
         kmeans = kmeans_p.contents
-        vl_kmeans_set_verbosity(kmeans, verbosity)
+        vl_kmeans_set_verbosity(kmeans, 1 if verbose else 0)
         vl_kmeans_set_num_repetitions(kmeans, num_rep)
         vl_kmeans_set_algorithm(kmeans, algorithm)
         vl_kmeans_set_initialization(kmeans, initialization)
@@ -191,7 +190,7 @@ def vl_kmeans(data, num_centers,
         # vl_kmeans_set_num_trees(kmeans, num_trees)
         # if ...: vl_kmeans_set_min_energy_variation(kmeans, min_energy_var)
 
-        if verbosity:
+        if verbose:
             pr = lambda *a, **k: print('kmeans:', *a, **k)
             pr("Initialization = {}".format(kmeans.initialization.name))
             pr("Algorithm = {}".format(kmeans.algorithm.name))

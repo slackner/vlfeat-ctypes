@@ -32,7 +32,7 @@ class Tests(unittest.TestCase):
         # Test vl_imsmooth
         binsize = 8
         magnif  = 3
-        img_smooth = vlfeat.vl_imsmooth(img_gray, math.sqrt((binsize / magnif)**2 - 0.25))
+        img_smooth = vlfeat.vl_imsmooth(img_gray, math.sqrt((binsize / magnif)**2 - 0.25), verbose=True)
         self.assertEqual(tuple(img_smooth.shape), (478, 640))
         self.assertTrue(numpy.allclose(img_smooth[:4, :4], numpy.array([[ 0.8998, 0.9013, 0.9034, 0.9057 ],
                                                                         [ 0.9000, 0.9015, 0.9035, 0.9057 ],
@@ -43,7 +43,7 @@ class Tests(unittest.TestCase):
             self.assertTrue(numpy.allclose(img_smooth, expected, atol=1e-4))
 
         # Test vl_dsift
-        frames, descrs = vlfeat.vl_dsift(img_smooth, size=binsize)
+        frames, descrs = vlfeat.vl_dsift(img_smooth, size=binsize, verbose=True)
         frames = numpy.add(frames.transpose(), 1)
         descrs = descrs.transpose()
         self.assertEqual(tuple(frames.shape), (2, 279664))
@@ -65,7 +65,7 @@ class Tests(unittest.TestCase):
             self.assertTrue(numpy.linalg.norm(expected - descrs) < 28) # rounding errors?
 
         # Test vl_kmeans
-        centers, assigns = vlfeat.vl_kmeans(numpy.array([[1], [2], [3], [10], [11], [12]], dtype='f'), 2, quantize=True)
+        centers, assigns = vlfeat.vl_kmeans(numpy.array([[1], [2], [3], [10], [11], [12]], dtype='f'), 2, quantize=True, verbose=True)
         self.assertTrue(numpy.allclose(centers, numpy.array([[2], [11]])))
         self.assertTrue(numpy.allclose(assigns, numpy.array([0, 0, 0, 1, 1, 1])))
 
