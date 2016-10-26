@@ -210,16 +210,14 @@ def vl_dsift(data, fast=False, norm=False, bounds=None, size=3, step=1,
         vl_dsift_process(dsift_p, data)
 
         # copy frames' locations, norms out
-        # the frames are a structure of just 4 doubles (VLDsiftKeypoint),
-        # which luckily looks exactly like an array of doubles. :)
-        # NOTE: this might be platform/compiler-dependent...but it works with
-        #       the provided binaries on os x, at least
+        # the frames are a structure of just 4 doubles (VLDsiftKeypoint)
         frames_p = cast(vl_dsift_get_keypoints(dsift), c_double_p)
         frames_p_a = npc.as_array(frames_p, shape=(num_frames, 4))
-        cols = [1, 0]
+        cols = [1, 0] # y, x
         if norm:
-            cols.append(3)
+            cols.append(3) # norm
         frames = np.require(frames_p_a[:, cols], requirements=['C', 'O'])
+        # NOTE: In contrast to Matlab, the assignment indices start with 0
 
         # copy descriptors into a new array
         descrs_p = npc.as_array(vl_dsift_get_descriptors(dsift), shape=(num_frames, descr_size))
@@ -232,22 +230,6 @@ def vl_dsift(data, fast=False, norm=False, bounds=None, size=3, step=1,
         vl_dsift_transpose_descriptor(new_order, np.arange(descr_size),
             geom.numBinT, geom.numBinX, geom.numBinY)
         descrs = descrs[:, new_order]
-        # the old, super-slow way:
-        ## # gross pointer arithmetic to get the relevant descriptor
-        ## descrs_addr = addressof(descrs.contents)
-        ## descrs_step = descr_size * sizeof(c_float)
-        ##
-        ## for k in range(num_frames):
-        ##     out_frames[:2, k] = [frames[k].y + 1, frames[k].x + 1]
-        ##     if norm:  # there's an implied / 2 in norm, because of clipping
-        ##         out_frames[2, k] = frames[k].norm
-        ##
-        ##     # gross pointer arithmetic to get the relevant descriptor
-        ##     the_descr = cast(descrs_addr + k * descrs_step, c_float_p)
-        ##     transposed = vl_dsift_transpose_descriptor(
-        ##         the_descr,
-        ##         geom.numBinT, geom.numBinX, geom.numBinY)
-        ##     out_descrs[:, k] = np.minimum(512. * transposed, 255.)
 
         return frames, descrs
 
